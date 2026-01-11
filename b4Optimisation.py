@@ -1,63 +1,27 @@
 from gmpy2 import *
 from random import *
+import time
+
 
 # 무작위 소수 p, q 구하기
 while True:
     
     #p 구하기
     while True:
-        
-        count = 0
+
         state = gmpy2.random_state(randint(1, 10000000))
-        p = random_number = gmpy2.mpz_urandomb(state, 30)
+        p = random_number = gmpy2.mpz_urandomb(state, 1024)
         
-        if p < 2 :
-            continue;
-        
-        sqrtP = gmpy2.sqrt(random_number)
-        
-        i = 2
-        while i <= sqrtP and count < 2:
-            modP = gmpy2.f_mod(p, i)
-            
-            if modP != 0:
-                pass
-            elif modP == 0:
-                count += 1
-                
-            i += 1
-                
-        if count >= 1:
-            continue
-        else : 
+        # 내장된 고성능 소수 판별 함수 사용 (Miller-Rabin 테스트)
+        if gmpy2.is_prime(p):
             break
         
     #q 구하기
     while True:
-        
-        count = 0
         state = gmpy2.random_state(randint(1, 10000000))
-        q = random_number = gmpy2.mpz_urandomb(state, 30)
-        
-        if q < 2 :
-            continue;
-        
-        sqrtQ = gmpy2.sqrt(random_number)
-        
-        i = 2
-        while i <= sqrtQ and count < 2:
-            modQ = gmpy2.f_mod(q, i)
-            
-            if modQ != 0:
-                pass
-            elif modQ == 0:
-                count += 1
-                
-            i += 1
-                
-        if count >= 1:
-            continue
-        else : 
+        q = gmpy2.mpz_urandomb(state, 1024)
+    
+        if gmpy2.is_prime(q) and q != p:
             break
         
     break
@@ -81,7 +45,7 @@ print(L)
 #E 구하기
 while True:
     state = gmpy2.random_state(randint(1, 10000000))
-    E = gmpy2.mpz_urandomb(state, 30)
+    E = gmpy2.mpz_urandomb(state, 1024)
     if E < 1:
         continue
     
@@ -126,6 +90,9 @@ def receive(sock):
             
             decryptedL = []
             decryptedL2 = []
+
+            # --- 시간 측정 시작 ---
+            start_time = time.perf_counter()
             
             for En in data:
                 decryptedL.append(gmpy2.powmod(En, D, N))
@@ -133,9 +100,14 @@ def receive(sock):
             for de in decryptedL:
                 decryptedL2.append(chr(de))
 
+            # --- 시간 측정 종료 ---
+            end_time = time.perf_counter()
+            duration = end_time - start_time # 걸린 시간 계산
+
+
             dataDecrypted = "".join(decryptedL2)
             
-            print('\n상대방 : ' + dataDecrypted + '\n')
+            print(f'\nChat partner : {dataDecrypted} (Decryption: {duration:.5f}s)\n')
         else : pass
 
 port = int(input("port : "))
